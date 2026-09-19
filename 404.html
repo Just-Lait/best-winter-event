@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Страница не найдена</title>
+
+<style>
+  @font-face {
+    font-family: 'Undertale';
+    src: url('fonts/Undertale.ttf') format('truetype');
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Undertale', 'Courier New', monospace;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 60px);
+    flex-wrap: wrap;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .sad-gif {
+    flex: 0 0 auto;
+    width: clamp(180px, 28vw, 360px);
+    height: auto;
+    image-rendering: auto;
+    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.15));
+  }
+
+  .text-block {
+    flex: 1 1 420px;
+    text-align: left;
+    min-width: 280px;
+  }
+
+  h1 {
+    font-size: clamp(40px, 7vw, 88px);
+    font-weight: normal;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .explain {
+    font-size: clamp(14px, 1.8vw, 19px);
+    line-height: 1.6;
+    color: #d6dae6;
+    margin-bottom: 20px;
+  }
+
+  .ps {
+    font-size: clamp(12px, 1.5vw, 15px);
+    line-height: 1.6;
+    color: #b8c2d6;
+    font-style: italic;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 18px;
+  }
+
+  .ps b { color: #fff; font-style: normal; }
+
+  .home-link {
+    display: inline-block;
+    margin-top: 24px;
+    color: #b8c2d6;
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 2px solid #fff;
+    padding: 12px 22px;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .home-link:hover {
+    background: #fff;
+    color: #000;
+  }
+
+  @media (max-width: 700px) {
+    .text-block { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <img src="videos/sad.gif" alt="sad" class="sad-gif" draggable="false">
+
+  <div class="text-block">
+    <h1>Вы переведены на страницу 404.</h1>
+
+    <p class="explain">
+      Это произошло в следствии того, что либо не найдена страница, куда вы хотите перейти, либо у вас нету к ней доступа! Либо вы нашли ошибку... Уже работаем над ней!
+    </p>
+
+    <p class="ps">
+      P.s. Если <b>Прушка</b> сделал херню и попал сюда — мы не будем над ней работать!
+    </p>
+
+    <a href="index.html" class="home-link">← На главную</a>
+  </div>
+
+</div>
+
+</body>
+</html>

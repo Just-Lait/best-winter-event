@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Шифр Цезаря</title>
+
+<style>
+  @font-face {
+    font-family: 'Undertale';
+    src: url('fonts/Undertale.ttf') format('truetype');
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Undertale', 'Courier New', monospace;
+    background: radial-gradient(ellipse at 50% -20%, #0a0f1e 0%, #05070f 50%, #000 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    letter-spacing: 0.5px;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 640px;
+    border: 2px solid #fff;
+    padding: 32px 28px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: normal;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .sub {
+    text-align: center;
+    color: #b8c2d6;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #b8c2d6;
+    margin-bottom: 8px;
+  }
+
+  textarea, input[type="number"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 16px;
+    resize: vertical;
+  }
+
+  textarea:focus, input[type="number"]:focus {
+    background: #0a0f1e;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
+
+  textarea { min-height: 100px; line-height: 1.5; }
+
+  .shift-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .shift-row > div { flex: 1; }
+
+  .shift-row input { margin-bottom: 16px; }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    cursor: pointer;
+    background: #fff;
+    color: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  button:hover { background: #b8c2d6; border-color: #b8c2d6; }
+
+  button.ghost {
+    background: transparent;
+    color: #fff;
+  }
+
+  button.ghost:hover { background: rgba(255, 255, 255, 0.1); }
+
+  .result-label {
+    margin-top: 20px;
+  }
+
+  .back {
+    display: block;
+    text-align: center;
+    margin-top: 24px;
+    color: #b8c2d6;
+    text-decoration: none;
+    font-size: 13px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 20px;
+    transition: color 0.15s;
+  }
+
+  .back:hover { color: #fff; }
+
+  .copy-info {
+    text-align: center;
+    color: #b8c2d6;
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .copy-info.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>Шифр Цезаря</h1>
+  <p class="sub">Сдвиг каждой буквы на N позиций</p>
+
+  <label for="input">Текст</label>
+  <textarea id="input" placeholder="Введите текст..."></textarea>
+
+  <div class="shift-row">
+    <div>
+      <label for="shift">Сдвиг (1–33)</label>
+      <input type="number" id="shift" value="3" min="1" max="33">
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button id="encrypt">Зашифровать</button>
+    <button id="decrypt" class="ghost">Расшифровать</button>
+  </div>
+
+  <label for="output" class="result-label">Результат</label>
+  <textarea id="output" placeholder="Здесь появится результат..." readonly></textarea>
+
+  <div class="copy-info" id="copy-info">Скопировано в буфер обмена</div>
+
+  <a href="cipher.html" class="back">← Назад к списку шифров</a>
+</div>
+
+<script>
+  /* ---------- АЛФАВИТЫ ---------- */
+  const RU_LOWER = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя';
+  const RU_UPPER = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+  const EN_LOWER = 'abcdefghijklmnopqrstuvwxyz';
+  const EN_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  /* Сдвиг для одного символа */
+  function shiftChar(ch, shift, alphabetLower, alphabetUpper) {
+    const len = alphabetLower.length;
+
+    let idx = alphabetLower.indexOf(ch);
+    if (idx !== -1) {
+      const newIdx = ((idx + shift) % len + len) % len;
+      return alphabetLower[newIdx];
+    }
+
+    idx = alphabetUpper.indexOf(ch);
+    if (idx !== -1) {
+      const newIdx = ((idx + shift) % len + len) % len;
+      return alphabetUpper[newIdx];
+    }
+
+    return ch; // не буква — оставляем как есть
+  }
+
+  /* Обработка всего текста */
+  function caesar(text, shift) {
+    let result = '';
+    for (const ch of text) {
+      if (RU_LOWER.includes(ch)) {
+        result += shiftChar(ch, shift, RU_LOWER, RU_UPPER);
+      } else if (RU_UPPER.includes(ch)) {
+        result += shiftChar(ch, shift, RU_LOWER, RU_UPPER);
+      } else if (EN_LOWER.includes(ch)) {
+        result += shiftChar(ch, shift, EN_LOWER, EN_UPPER);
+      } else if (EN_UPPER.includes(ch)) {
+        result += shiftChar(ch, shift, EN_LOWER, EN_UPPER);
+      } else {
+        result += ch;
+      }
+    }
+    return result;
+  }
+
+  /* ---------- UI ---------- */
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const shiftInput = document.getElementById('shift');
+  const copyInfo = document.getElementById('copy-info');
+
+  function getShift() {
+    const raw = Number(shiftInput.value);
+    if (isNaN(raw) || raw === 0) return 3;
+    return raw;
+  }
+
+  document.getElementById('encrypt').addEventListener('click', () => {
+    output.value = caesar(input.value, getShift());
+  });
+
+  document.getElementById('decrypt').addEventListener('click', () => {
+    output.value = caesar(input.value, -getShift());
+  });
+
+  /* Копирование по клику на результат */
+  output.addEventListener('click', () => {
+    if (!output.value) return;
+    output.select();
+    document.execCommand('copy');
+    copyInfo.classList.add('show');
+    setTimeout(() => copyInfo.classList.remove('show'), 1500);
+  });
+</script>
+</body>
+</html>

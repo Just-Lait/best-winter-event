@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>До Нового года осталось…</title>
+
+<style>
+  /* ---------- ШРИФТ ---------- */
+  @font-face {
+    font-family: 'Undertale';
+    src: url('fonts/Undertale.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  :root {
+    --bg-top: #05070f;
+    --bg-bottom: #000000;
+    --accent: #ffffff;
+    --text: #ffffff;
+    --muted: #b8c2d6;
+    --special: #ef233c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Undertale', 'Courier New', monospace;
+    background: radial-gradient(ellipse at 50% -20%, #0a0f1e 0%, var(--bg-top) 50%, var(--bg-bottom) 100%);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    letter-spacing: 0.5px;
+  }
+
+  /* Снег */
+  #snow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Гирлянда */
+  .garland {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 3;
+    pointer-events: none;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding: 0 4vw;
+    overflow: hidden;
+  }
+
+  .bulb {
+    width: 10px;
+    height: 10px;
+    border-radius: 0;
+    margin-top: 8px;
+    background: #ffd60a;
+    box-shadow: 0 0 12px currentColor, 0 0 24px currentColor;
+    animation: blink 2.2s infinite ease-in-out;
+    position: relative;
+  }
+
+  .bulb:nth-child(3n)   { color: #ef233c; background: #ef233c; animation-delay: 0.2s; }
+  .bulb:nth-child(3n+1) { color: #ffd60a; background: #ffd60a; animation-delay: 0.6s; }
+  .bulb:nth-child(3n+2) { color: #4cc9f0; background: #4cc9f0; animation-delay: 1.1s; }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+
+  /* Кнопка настроек */
+  #settings-btn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    color: #fff;
+    text-decoration: none;
+    font-size: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    transition: background 0.2s, transform 0.2s;
+    font-family: 'Undertale', 'Courier New', monospace;
+  }
+
+  #settings-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: rotate(45deg);
+  }
+
+  /* Кнопка "Шифры" — большая, без рамки, снизу слева */
+  #cipher-btn {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    z-index: 10;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    text-decoration: none;
+    transition: transform 0.2s;
+    overflow: visible;
+  }
+
+  #cipher-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+    transition: filter 0.2s;
+  }
+
+  #cipher-btn:hover {
+    transform: scale(1.1);
+  }
+
+  #cipher-btn:hover img {
+    filter: drop-shadow(0 0 20px rgba(255, 214, 10, 0.6));
+  }
+
+  @media (max-width: 480px) {
+    #cipher-btn {
+      width: 120px;
+      height: 120px;
+      left: 12px;
+      bottom: 12px;
+    }
+  }
+
+  /* ---------- ПРУЖИНКА ---------- */
+  #boing-img {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 140px;
+    height: auto;
+    cursor: pointer;
+    z-index: 20;
+    user-select: none;
+    -webkit-user-drag: none;
+    transform-origin: center bottom;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
+  }
+
+  #boing-img:hover {
+    filter: drop-shadow(0 0 16px rgba(255, 214, 10, 0.5));
+  }
+
+  #boing-img.squash {
+    transform: scaleY(0.15) scaleX(1.1);
+  }
+
+  @media (max-width: 480px) {
+    #boing-img { width: 90px; right: 12px; bottom: 12px; }
+  }
+
+  /* Контент */
+  .stage {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 40px 24px;
+    max-width: 760px;
+    width: 100%;
+  }
+
+  .label {
+    font-size: clamp(11px, 2vw, 14px);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 18px;
+    opacity: 0.75;
+  }
+
+  h1 {
+    font-size: clamp(24px, 5.5vw, 46px);
+    line-height: 1.2;
+    margin-bottom: 32px;
+    color: var(--text);
+    font-weight: normal;
+  }
+
+  /* Таймер */
+  .timer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(8px, 2vw, 18px);
+    margin-bottom: 36px;
+  }
+
+  .cell {
+    background: #000000;
+    border: 2px solid #ffffff;
+    border-radius: 0;
+    padding: clamp(14px, 3vw, 24px) 6px clamp(10px, 2vw, 16px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+  }
+
+  .num {
+    font-family: 'Undertale', 'Courier New', monospace;
+    font-size: clamp(28px, 7vw, 56px);
+    font-weight: normal;
+    color: #ffffff;
+    display: block;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    transition: transform 0.15s ease-out;
+  }
+
+  .num.tick { transform: scale(1.08); }
+
+  .unit {
+    font-size: clamp(9px, 1.6vw, 12px);
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 10px;
+    opacity: 0.75;
+  }
+
+  /* Фраза */
+  .phrase {
+    font-size: clamp(15px, 2.6vw, 21px);
+    line-height: 1.5;
+    color: var(--text);
+    min-height: 3.2em;
+    transition: color 0.4s, transform 0.4s;
+    padding: 0 8px;
+  }
+
+  .phrase.special {
+    color: var(--special);
+    font-weight: normal;
+    text-shadow: 0 0 18px rgba(239, 35, 60, 0.6);
+  }
+
+  /* Тряска */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-4px); }
+    40%      { transform: translateX(4px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
+  }
+
+  .stage.shake { animation: shake 0.5s ease-in-out; }
+
+  /* Финальный экран */
+  .final { display: none; }
+  .final.show { display: block; }
+
+  .final h1 {
+    font-size: clamp(32px, 8vw, 72px);
+    margin-bottom: 20px;
+    color: var(--text);
+    animation: pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes pop {
+    0%   { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+
+  .final .sub {
+    color: var(--muted);
+    font-size: clamp(14px, 2.4vw, 18px);
+  }
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+  }
+
+  @media (max-width: 480px) {
+    .timer { gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+  <canvas id="snow"></canvas>
+  <a href="admin.html" id="settings-btn">⚙</a>
+  <a href="cipher.html" id="cipher-btn" title="Шифры">
+    <img src="images/cipher.png" alt="Шифры">
+  </a>
+  <div class="garland"></div>
+  <canvas id="confetti"></canvas>
+
+  <img src="images/Just_photo.jpg"
+       alt="boing"
+       id="boing-img"
+       draggable="false">
+
+<div class="stage" id="stage">
+
+  <div id="countdown-view">
+    <div class="label">Официальное уведомление</div>
+    <h1>До Нового года осталось</h1>
+
+    <div class="timer">
+      <div class="cell"><span class="num" id="d">00</span><div class="unit">дней</div></div>
+      <div class="cell"><span class="num" id="h">00</span><div class="unit">часов</div></div>
+      <div class="cell"><span class="num" id="m">00</span><div class="unit">минут</div></div>
+      <div class="cell"><span class="num" id="s">00</span><div class="unit">секунд</div></div>
+    </div>
+
+    <div class="phrase" id="phrase">Загрузка…</div>
+  </div>
+
+  <div class="final" id="final-view">
+    <h1>С Новым годом!</h1>
+    <p class="sub">Ну всё. Дальше — только вперёд.</p>
+  </div>
+
+</div>
+
+<script>
+  /* ============ НАСТРОЙКА ============ */
+  const DEFAULT_ISO = '2026-12-31T00:00';
+  const savedISO = localStorage.getItem('newyear_target');
+  const TARGET = new Date(savedISO || DEFAULT_ISO);
+  /* =================================== */
+
+  /* ---------- ГИРЛЯНДА ---------- */
+  (function buildGarland() {
+    const g = document.querySelector('.garland');
+    const count = Math.min(24, Math.max(10, Math.floor(window.innerWidth / 60)));
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement('div');
+      b.className = 'bulb';
+      g.appendChild(b);
+    }
+  })();
+
+  /* ---------- СНЕГ ---------- */
+  const snowCanvas = document.getElementById('snow');
+  const sctx = snowCanvas.getContext('2d');
+  let flakes = [];
+
+  function resizeSnow() {
+    snowCanvas.width = window.innerWidth;
+    snowCanvas.height = window.innerHeight;
+    const count = Math.min(160, Math.floor(window.innerWidth / 12));
+    flakes = Array.from({ length: count }, () => ({
+      x: Math.random() * snowCanvas.width,
+      y: Math.random() * snowCanvas.height,
+      r: Math.random() * 2 + 0.5,
+      vy: Math.random() * 0.6 + 0.25,
+      vx: Math.random() * 0.5 - 0.25,
+      a: Math.random() * 0.5 + 0.3
+    }));
+  }
+
+  function drawSnow() {
+    sctx.clearRect(0, 0, snowCanvas.width, snowCanvas.height);
+    sctx.fillStyle = '#ffffff';
+    for (const f of flakes) {
+      sctx.globalAlpha = f.a;
+      sctx.beginPath();
+      sctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      sctx.fill();
+
+      f.y += f.vy;
+      f.x += f.vx;
+
+      if (f.y > snowCanvas.height + 5) {
+        f.y = -5;
+        f.x = Math.random() * snowCanvas.width;
+      }
+      if (f.x > snowCanvas.width + 5) f.x = -5;
+      if (f.x < -5) f.x = snowCanvas.width + 5;
+    }
+    sctx.globalAlpha = 1;
+    requestAnimationFrame(drawSnow);
+  }
+
+  window.addEventListener('resize', resizeSnow);
+  resizeSnow();
+  drawSnow();
+
+  /* ---------- ФРАЗЫ ---------- */
+  const HOUR = 3600 * 1000;
+  const DAY  = 24 * HOUR;
+  const MIN  = 60 * 1000;
+
+  const PHRASES = [
+    { min: 31 * DAY,  text: 'До Нового года ещё далеко. Живи пока.' },
+    { min: 8  * DAY,  text: 'Уже скоро. Начинай готовиться к празднику и ивенту' },
+    { min: 4  * DAY,  text: 'Неделя. Уже очень скоро ивент..' },
+    { min: 3  * DAY,  text: 'Три дня осталось. Нам осталось жить ровно три дня!', special: true },
+    { min: 2  * DAY,  text: 'Два дня. Еда к празднику сама себя не сделает.' },
+    { min: 12 * HOUR, text: 'Завтра. Ложись спать пораньше, чтобы раньше проснуться. Хотя кого я обманываю, ты ляжешь как обычно поздно' },
+    { min: 6  * HOUR, text: 'Полдня, больше такого года как 2026 не будет, ты это понимаешь?' },
+    { min: 1  * HOUR, text: 'Шесть часов. Ты ещё не готов.' },
+    { min: 10 * MIN,  text: 'Час. Готовься.' },
+    { min: 1  * MIN,  text: 'Десять минут. Достань чай..' },
+    { min: 0,         text: 'Минута. Всё, я затыкаюсь.' }
+  ];
+
+  function pickPhrase(msLeft) {
+    for (const p of PHRASES) {
+      if (msLeft > p.min) return p;
+    }
+    return PHRASES[PHRASES.length - 1];
+  }
+
+  /* ---------- ТАЙМЕР ---------- */
+  const el = {
+    d: document.getElementById('d'),
+    h: document.getElementById('h'),
+    m: document.getElementById('m'),
+    s: document.getElementById('s'),
+    phrase: document.getElementById('phrase'),
+    stage: document.getElementById('stage'),
+    countdownView: document.getElementById('countdown-view'),
+    finalView: document.getElementById('final-view')
+  };
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  let lastPhraseText = '';
+  let specialTriggered = false;
+  let finished = false;
+
+  function setNum(node, value) {
+    const str = pad(value);
+    if (node.textContent === str) return;
+    node.textContent = str;
+    node.classList.add('tick');
+    setTimeout(() => node.classList.remove('tick'), 150);
+  }
+
+  function tick() {
+    if (finished) return;
+
+    const now = Date.now();
+    let diff = TARGET.getTime() - now;
+
+    if (diff <= 0) { finish(); return; }
+
+    const d = Math.floor(diff / DAY);
+    const h = Math.floor(diff / HOUR) % 24;
+    const m = Math.floor(diff / MIN) % 60;
+    const s = Math.floor(diff / 1000) % 60;
+
+    setNum(el.d, d);
+    setNum(el.h, h);
+    setNum(el.m, m);
+    setNum(el.s, s);
+
+    const p = pickPhrase(diff);
+    if (p.text !== lastPhraseText) {
+      el.phrase.textContent = p.text;
+      el.phrase.classList.toggle('special', !!p.special);
+      lastPhraseText = p.text;
+
+      if (p.special && !specialTriggered) {
+        specialTriggered = true;
+        el.stage.classList.add('shake');
+        setTimeout(() => el.stage.classList.remove('shake'), 600);
+      }
+    }
+  }
+
+  tick();
+  setInterval(tick, 250);
+
+  /* ---------- ФИНАЛ + КОНФЕТТИ ---------- */
+  function finish() {
+    if (finished) return;
+    finished = true;
+
+    el.d.textContent = '00';
+    el.h.textContent = '00';
+    el.m.textContent = '00';
+    el.s.textContent = '00';
+
+    el.countdownView.style.display = 'none';
+    el.finalView.classList.add('show');
+
+    startConfetti();
+  }
+
+  const confCanvas = document.getElementById('confetti');
+  const cctx = confCanvas.getContext('2d');
+  let confPieces = [];
+  let confActive = false;
+
+  function resizeConf() {
+    confCanvas.width = window.innerWidth;
+    confCanvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeConf);
+  resizeConf();
+
+  const CONFETTI_COLORS = ['#ffd60a', '#ef233c', '#4cc9f0', '#ffffff', '#f77f00', '#06d6a0'];
+
+  function startConfetti() {
+    confActive = true;
+    confPieces = [];
+    for (let i = 0; i < 160; i++) {
+      confPieces.push({
+        x: Math.random() * confCanvas.width,
+        y: -20 - Math.random() * confCanvas.height * 0.5,
+        w: 6 + Math.random() * 8,
+        h: 8 + Math.random() * 10,
+        vy: 1.5 + Math.random() * 2.5,
+        vx: -1 + Math.random() * 2,
+        rot: Math.random() * Math.PI,
+        vr: -0.1 + Math.random() * 0.2,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)]
+      });
+    }
+    requestAnimationFrame(drawConfetti);
+  }
+
+  function drawConfetti() {
+    if (!confActive) return;
+    cctx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+
+    for (const p of confPieces) {
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      cctx.fillStyle = p.color;
+      cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cctx.restore();
+
+      p.y += p.vy;
+      p.x += p.vx;
+      p.rot += p.vr;
+
+      if (p.y > confCanvas.height + 20) {
+        p.y = -20;
+        p.x = Math.random() * confCanvas.width;
+      }
+    }
+
+    requestAnimationFrame(drawConfetti);
+  }
+
+  /* ---------- ПРУЖИНКА ---------- */
+  (function boingImg() {
+    const img = document.getElementById('boing-img');
+    if (!img) return;
+
+    const SOUNDS = [
+      'sound/sound1.mp3',
+      'sound/sound2.mp3',
+      'sound/sound3.mp3',
+      'sound/sound4.mp3',
+      'sound/sound5.mp3',
+      'sound/sound6.mp3',
+      'sound/sound7.mp3',
+      'sound/sound8.mp3',
+      'sound/sound9.mp3',
+      'sound/sound10.mp3',
+      'sound/sound11.mp3',
+      'sound/sound12.mp3',
+      'sound/sound13.mp3'
+    ];
+
+    const audios = SOUNDS.map(src => {
+      const a = new Audio(src);
+      a.preload = 'auto';
+      return a;
+    });
+
+    const VOLUME_KEY = 'newyear_volume';
+    function getVolume() {
+      const saved = localStorage.getItem(VOLUME_KEY);
+      return saved !== null ? Number(saved) : 0.7;
+    }
+
+    let busy = false;
+    let currentAudio = null;
+
+    img.addEventListener('click', () => {
+      if (busy) return;
+      busy = true;
+
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        currentAudio = null;
+      }
+
+      img.classList.add('squash');
+
+      setTimeout(() => {
+        img.classList.remove('squash');
+
+        const random = audios[Math.floor(Math.random() * audios.length)];
+        random.currentTime = 0;
+        random.volume = getVolume();
+        random.play().catch(() => {});
+        currentAudio = random;
+      }, 180);
+
+      setTimeout(() => { busy = false; }, 600);
+    });
+  })();
+</script>
+</body>
+</html>

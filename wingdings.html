@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wingdings</title>
+
+<style>
+  @font-face {
+    font-family: 'Undertale';
+    src: url('fonts/Undertale.ttf') format('truetype');
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Undertale', 'Courier New', monospace;
+    background: radial-gradient(ellipse at 50% -20%, #0a0f1e 0%, #05070f 50%, #000 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    letter-spacing: 0.5px;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 720px;
+    border: 2px solid #fff;
+    padding: 32px 28px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: normal;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .sub {
+    text-align: center;
+    color: #b8c2d6;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #b8c2d6;
+    margin-bottom: 8px;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 14px 16px;
+    background: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    color: #fff;
+    font-family: 'Undertale', 'Courier New', monospace;
+    font-size: 18px;
+    outline: none;
+    margin-bottom: 16px;
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.5;
+    letter-spacing: 2px;
+  }
+
+  textarea:focus {
+    background: #0a0f1e;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    flex: 1;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    cursor: pointer;
+    background: #fff;
+    color: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  button:hover { background: #b8c2d6; border-color: #b8c2d6; }
+
+  button.ghost {
+    background: transparent;
+    color: #fff;
+  }
+
+  button.ghost:hover { background: rgba(255, 255, 255, 0.1); }
+
+  .result-label {
+    margin-top: 20px;
+  }
+
+  .back {
+    display: block;
+    text-align: center;
+    margin-top: 24px;
+    color: #b8c2d6;
+    text-decoration: none;
+    font-size: 13px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 20px;
+    transition: color 0.15s;
+  }
+
+  .back:hover { color: #fff; }
+
+  .copy-info {
+    text-align: center;
+    color: #b8c2d6;
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .copy-info.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>Wingdings</h1>
+  <p class="sub">Преобразование текста в символы Wingdings и обратно</p>
+
+  <label for="input">Текст</label>
+  <textarea id="input" placeholder="Введите текст на английском..."></textarea>
+
+  <div class="buttons">
+    <button id="encrypt">→ Wingdings</button>
+    <button id="decrypt" class="ghost">← В английский</button>
+  </div>
+
+  <label for="output" class="result-label">Результат</label>
+  <textarea id="output" placeholder="Здесь появится результат..." readonly></textarea>
+
+  <div class="copy-info" id="copy-info">Скопировано в буфер обмена</div>
+
+  <a href="cipher.html" class="back">← Назад к списку шифров</a>
+</div>
+
+<script>
+  /* ---------- ТАБЛИЦА WINGDINGS ---------- */
+  // Ключ: буква/цифра. Значение: Unicode-символ, который выглядит как Wingdings.
+  // Взято из официальных маппингов Unicode (L2/12-368 и др.)
+
+  const WINGDINGS_MAP = {
+    // Буквы A-Z
+    'A': '✌︎',  // ✌ VICTORY HAND
+    'B': '👍︎',  // 👍 THUMBS UP SIGN
+    'C': '☜︎',  // ☜ WHITE LEFT POINTING INDEX
+    'D': '☞︎',  // ☞ WHITE RIGHT POINTING INDEX
+    'E': '☝︎',  // ☝ WHITE UP POINTING INDEX
+    'F': '🖐︎',  // 🖐 RAISED HAND WITH FINGERS SPLAYED
+    'G': '☺︎',  // ☺ WHITE SMILING FACE
+    'H': '😐︎',  // 😐 NEUTRAL FACE
+    'I': '☹︎',  // ☹ FROWNING FACE
+    'J': '💣︎',  // 💣 BOMB
+    'K': '🏳︎',  // 🏳 WHITE FLAG
+    'L': '✈︎',  // ✈ AIRPLANE
+    'M': '☼︎',  // ☼ SUN
+    'N': '❄︎',  // ❄ SNOWFLAKE
+    'O': '✞︎',  // ✞ CROSS
+    'P': '✠︎',  // ✠ MALTESE CROSS
+    'Q': '✡︎',  // ✡ STAR OF DAVID
+    'R': '☪︎',  // ☪ STAR AND CRESCENT
+    'S': '☯︎',  // ☯ YIN YANG
+    'T': '☸︎',  // ☸ WHEEL OF DHARMA
+    'U': '♈︎',  // ♈ ARIES
+    'V': '♉︎',  // ♉ TAURUS
+    'W': '♊︎',  // ♊ GEMINI
+    'X': '♋︎',  // ♋ CANCER
+    'Y': '♌︎',  // ♌ LEO
+    'Z': '♍︎',  // ♍ VIRGO
+
+    // Цифры 0-9
+    '0': '📁︎',
+    '1': '🗀︎',
+    '2': '🗁︎',
+    '3': '🗎︎',
+    '4': '🗏︎',
+    '5': '🗐︎',
+    '6': '🗄︎',
+    '7': '⏳︎',
+    '8': '🖮︎',
+    '9': '🖰︎',
+  };
+
+  // Обратный маппинг (символ → буква)
+  const REVERSE_MAP = {};
+  for (const [letter, symbol] of Object.entries(WINGDINGS_MAP)) {
+    REVERSE_MAP[symbol] = letter;
+  }
+
+  /* ---------- ШИФРОВКА ---------- */
+  function toWingdings(text) {
+    let result = '';
+    for (const ch of text) {
+      const upper = ch.toUpperCase();
+      if (WINGDINGS_MAP[upper]) {
+        result += WINGDINGS_MAP[upper];
+      } else {
+        result += ch; // пробелы, знаки препинания — оставляем
+      }
+    }
+    return result;
+  }
+
+  function fromWingdings(text) {
+    let result = '';
+    // Разбиваем на «символ + возможный модификатор»
+    const chars = Array.from(text);
+    for (let i = 0; i < chars.length; i++) {
+      const ch = chars[i];
+      // Если следующий символ — модификатор U+FE0E или U+FE0F, пропускаем его
+      const next = chars[i + 1];
+      const isModifier = next === '\uFE0E' || next === '\uFE0F';
+
+      // Ищем базовый символ в таблице — и с модификатором, и без
+      let matched = null;
+      if (isModifier) {
+        matched = REVERSE_MAP[ch + next] || REVERSE_MAP[ch];
+      } else {
+        matched = REVERSE_MAP[ch];
+      }
+
+      if (matched) {
+        result += matched;
+        if (isModifier) i++; // пропускаем модификатор
+      } else {
+        result += ch;
+      }
+    }
+    return result;
+  }
+
+  /* ---------- UI ---------- */
+  const input = document.getElementById('input');
+  const output = document.getElementById('output');
+  const copyInfo = document.getElementById('copy-info');
+
+  document.getElementById('encrypt').addEventListener('click', () => {
+    output.value = toWingdings(input.value);
+  });
+
+  document.getElementById('decrypt').addEventListener('click', () => {
+    output.value = fromWingdings(input.value);
+  });
+
+  output.addEventListener('click', () => {
+    if (!output.value) return;
+    output.select();
+    document.execCommand('copy');
+    copyInfo.classList.add('show');
+    setTimeout(() => copyInfo.classList.remove('show'), 1500);
+  });
+</script>
+</body>
+</html>

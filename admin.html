@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Настройка таймера</title>
+
+<style>
+  @font-face {
+    font-family: 'Undertale';
+    src: url('fonts/Undertale.ttf') format('opentype');
+    font-display: swap;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Undertale', 'Courier New', monospace;
+    background: radial-gradient(ellipse at 50% -20%, #0a0f1e 0%, #05070f 50%, #000 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    letter-spacing: 0.5px;
+  }
+
+  .panel {
+    width: 100%;
+    max-width: 460px;
+    border: 2px solid #fff;
+    padding: 32px 28px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: normal;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .sub {
+    text-align: center;
+    color: #b8c2d6;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #b8c2d6;
+    margin-bottom: 8px;
+  }
+
+  input[type="datetime-local"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    color: #fff;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 20px;
+    color-scheme: dark;
+  }
+
+  input[type="datetime-local"]:focus {
+    background: #0a0f1e;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Ползунок громкости */
+  input[type="range"] {
+    width: 100%;
+    margin-bottom: 20px;
+    accent-color: #fff;
+    background: transparent;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: #333;
+    border: 1px solid #fff;
+    border-radius: 0;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 2px solid #fff;
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 2px solid #fff;
+    border-radius: 0;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-moz-range-track {
+    height: 6px;
+    background: #333;
+    border: 1px solid #fff;
+  }
+
+  #vol-val { color: #fff; }
+
+  .current {
+    font-size: 12px;
+    color: #b8c2d6;
+    margin-bottom: 24px;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .current b { color: #fff; font-weight: normal; }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 14px 20px;
+    cursor: pointer;
+    background: #fff;
+    color: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  button:hover {
+    background: #b8c2d6;
+    border-color: #b8c2d6;
+  }
+
+  button.ghost {
+    background: transparent;
+    color: #fff;
+  }
+
+  button.ghost:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #6b7488;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 24px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>Настройка таймера</h1>
+  <p class="sub">Укажите дату и время, до которого идёт отсчёт</p>
+
+  <label for="target">Целевая дата и время</label>
+  <input type="datetime-local" id="target">
+
+  <div class="current" id="current"></div>
+
+  <div class="divider"></div>
+
+  <label for="volume">Громкость звуков: <span id="vol-val">70</span>%</label>
+  <input type="range" id="volume" min="0" max="100" step="1" value="70">
+
+  <div class="actions">
+    <button id="save">Сохранить и вернуться</button>
+    <button id="reset" class="ghost">Сбросить на стандартную (31.12.2026/01.01.2027 00:00)</button>
+  </div>
+
+  <p class="note">Для далбаёбов как Прушка: Настройка хранится в localStorage этого браузера.<br>
+  Для другого устройства — задайте дату ЗАНОВО.</p>
+</div>
+
+<script>
+  const KEY = 'newyear_target';
+  const VOLUME_KEY = 'newyear_volume';
+  const DEFAULT_ISO = '2026-12-31T00:00';
+
+  const input = document.getElementById('target');
+  const currentEl = document.getElementById('current');
+  const volumeInput = document.getElementById('volume');
+  const volVal = document.getElementById('vol-val');
+
+  /* ---------- ДАТА ---------- */
+  function loadCurrent() {
+    const saved = localStorage.getItem(KEY);
+    const iso = saved || DEFAULT_ISO;
+    input.value = iso;
+    renderCurrent(iso);
+  }
+
+  function renderCurrent(iso) {
+    if (!iso) { currentEl.textContent = ''; return; }
+    const d = new Date(iso);
+    const fmt = d.toLocaleString('ru-RU', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    currentEl.innerHTML = 'Сейчас отсчёт идёт до: <b>' + fmt + '</b>';
+  }
+
+  input.addEventListener('input', () => renderCurrent(input.value));
+
+  document.getElementById('save').addEventListener('click', () => {
+    if (!input.value) return;
+    localStorage.setItem(KEY, input.value);
+    location.href = 'index.html';
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    input.value = DEFAULT_ISO;
+    renderCurrent(DEFAULT_ISO);
+  });
+
+  /* ---------- ГРОМКОСТЬ ---------- */
+  function loadVolume() {
+    const saved = localStorage.getItem(VOLUME_KEY);
+    const v = saved !== null ? Number(saved) : 0.7;
+    volumeInput.value = Math.round(v * 100);
+    volVal.textContent = Math.round(v * 100);
+  }
+
+  volumeInput.addEventListener('input', () => {
+    volVal.textContent = volumeInput.value;
+    localStorage.setItem(VOLUME_KEY, (volumeInput.value / 100).toString());
+  });
+
+  /* ---------- СТАРТ ---------- */
+  loadCurrent();
+  loadVolume();
+</script>
+</body>
+</html>
